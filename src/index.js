@@ -10,7 +10,7 @@ const transformedNativeTypes = {
   float: 'number',
   FireId: 'number',
   Any: 'any',
-  ScrHandle: 'unknown',
+  ScrHandle: 'number',
   Interior: 'number',
   Cam: "number",
   FireId: "number",
