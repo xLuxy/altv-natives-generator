@@ -15,6 +15,10 @@ const transformedNativeTypes = {
   Cam: "number",
   FireId: "number",
   Pickup: "number",
+  Ped: "Ped | number",
+  Player: "Player | number",
+  Vehicle: "Vehicle | number",
+  Entity: "Entity | number",
 };
 
 function convertSnakeToLowerCamelCase(input) {
@@ -94,13 +98,13 @@ async function main() {
   }
 
   const fileHeaderWithDate = `// This file was generated on ${new Date().toLocaleString()} - DO NOT MODIFY MANUALLY\n
-/// <reference types="../shared/index.d.ts" />
+/// <reference types="../client/index.d.ts" />
 
 /**
  * @module @altv/natives
  */
 declare module "@altv/natives" {
-  import { Entity, Player, Vector3, Vehicle } from "@altv/shared";
+  import { Entity, Player, Vector3, Vehicle } from "@altv/client";
 
 ${nativesList.join('\n\n')}
 }
