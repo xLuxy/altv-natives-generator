@@ -15,7 +15,8 @@ const transformedNativeTypes = {
   Cam: "number",
   FireId: "number",
   Pickup: "number",
-  Ped: "Ped | number",
+  // NOTE (xLuxy): Player might be wrong for some natives - majority should work?
+  Ped: "Ped | Player | number",
   Player: "Player | number",
   Vehicle: "Vehicle | number",
   Entity: "Entity | number",
