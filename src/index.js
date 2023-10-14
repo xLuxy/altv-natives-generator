@@ -69,7 +69,7 @@ async function getNativeDbJson() {
 }
 
 function transformNativeParams(params) {
-  return params.map((param) => `${param.name}: ${transformNativeType(param.type)}`);
+  return params.map((param) => `${param.name}${param.ref ? '?' : ''}: ${transformNativeType(param.type)}`);
 }
 
 async function main() {
