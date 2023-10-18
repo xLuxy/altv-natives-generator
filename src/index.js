@@ -20,6 +20,7 @@ const transformedNativeTypes = {
   Player: "Player | number",
   Vehicle: "Vehicle | number",
   Entity: "Entity | number",
+  Blip: 'number'
 };
 
 function convertSnakeToLowerCamelCase(input) {
@@ -109,7 +110,7 @@ async function main() {
  * @module @altv/natives
  */
 declare module "@altv/natives" {
-  import { Entity, Player, Vector3, Vehicle } from "@altv/client";
+  import { Entity, Player, Ped, Vector3, Vehicle } from "@altv/client";
 
 ${nativesList.join('\n\n')}
 }
