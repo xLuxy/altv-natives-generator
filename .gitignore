@@ -3,3 +3,4 @@ node_modules/
 dist/
 
 natives.json
+natives.release-old.json

@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 
 const NATIVEDB_URL = 'https://natives.altv.mp/natives';
 const NATIVEDB_CACHE_FILE = './natives.json';
+const NATIVEDB_CACHE_OLD_FILE = './natives.release-old.json';
 
 const transformedNativeTypes = {
   Hash: 'number',
@@ -64,6 +65,27 @@ async function getOrCacheNativeDbJson() {
   return fs.readFileSync(NATIVEDB_CACHE_FILE, 'utf8');
 }
 
+function getOldNativesNames() {
+  if (!fs.existsSync(NATIVEDB_CACHE_OLD_FILE)) {
+    return [];
+  }
+
+  const fileContent = fs.readFileSync(NATIVEDB_CACHE_OLD_FILE, 'utf8');
+  const json = JSON.parse(fileContent);
+
+  const nativesNameList = [];
+
+  for (const natives of Object.values(json)) {
+    for (const native of Object.values(natives)) {
+      const nativeName = convertSnakeToLowerCamelCase(native.name);
+
+      nativesNameList.push(nativeName);
+    }
+  }
+
+  return nativesNameList;
+}
+
 async function getNativeDbJson() {
   const response = await axios.get(NATIVEDB_URL);
   return response.data;
@@ -79,13 +101,18 @@ function transformNativeParams(params) {
 
 async function main() {
   const content = await getOrCacheNativeDbJson();
+  const prevNatives = getOldNativesNames();
+
   const json = JSON.parse(content);
 
   const nativesList = [];
+  const nativesNameList = [];
 
   for (const natives of Object.values(json)) {
     for (const native of Object.values(natives)) {
       const nativeName = convertSnakeToLowerCamelCase(native.name);
+      nativesNameList.push(nativeName);
+
       const { params, results, comment } = native;
 
       let transformedResult = results.replace(/^\[(.*)\]$/, '$1').split(', ').map((value) => transformNativeType(value));
@@ -102,6 +129,11 @@ async function main() {
       }
     }
   }
+
+  const newNatives = nativesNameList.filter((native) => !prevNatives.includes(native));
+
+  console.log(`Total natives count: ${nativesList.length} (${newNatives.length} new natives):`);
+  console.log(newNatives);
 
   const fileHeaderWithDate = `// This file was generated on ${new Date().toLocaleString()} - DO NOT MODIFY MANUALLY\n
 /// <reference types="../client/index.d.ts" />
