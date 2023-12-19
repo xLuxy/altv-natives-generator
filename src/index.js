@@ -5,6 +5,8 @@ const NATIVEDB_URL = 'https://natives.altv.mp/natives';
 const NATIVEDB_CACHE_FILE = './natives.json';
 const NATIVEDB_CACHE_OLD_FILE = './natives.release-old.json';
 
+const V1_TYPINGS = process.argv.includes('--v1');
+
 const transformedNativeTypes = {
   Hash: 'number',
   int: 'number',
@@ -116,7 +118,7 @@ async function main() {
       const { params, results, comment } = native;
 
       let transformedResult = results.replace(/^\[(.*)\]$/, '$1').split(', ').map((value) => transformNativeType(value));
-      if (transformedResult[0] === 'void') transformedResult.shift();
+      if (transformedResult[0] === 'void' && !V1_TYPINGS) transformedResult.shift();
 
       const resultStr = transformedResult.length > 1 ? `[${transformedResult.join(', ')}]` : transformedResult[0] || 'void';
       const functionSignature = `  export function ${nativeName}(${transformNativeParams(params).join(', ')}): ${resultStr};`;
@@ -135,20 +137,30 @@ async function main() {
   console.log(`Total natives count: ${nativesList.length} (${newNatives.length} new natives):`);
   console.log(newNatives);
 
-  const fileHeaderWithDate = `// This file was generated on ${new Date().toLocaleString()} - DO NOT MODIFY MANUALLY\n
-/// <reference types="../client/index.d.ts" />
+  let fileContent = '// This file was generated on ' + new Date().toLocaleString() + ' - DO NOT MODIFY MANUALLY\n\n';
 
+  if (V1_TYPINGS) {
+    fileContent += `/// <reference types="@altv/types-client"/>\n
+/**
+ * @module natives
+ */
+declare module "natives" {
+  import { Vector3, Entity, Vehicle, Player } from "alt-client";
+  export function toggleStrictChecks(enable: boolean): void;\n
+`;
+  } else {
+    fileContent += `/// <reference types="@altv/client" />\n
 /**
  * @module @altv/natives
  */
 declare module "@altv/natives" {
-  import { Entity, Player, Ped, Vector3, Vehicle } from "@altv/client";
-
-${nativesList.join('\n\n')}
-}
+  import { Entity, Player, Ped, Vector3, Vehicle } from "@altv/client";\n
 `;
+  }
 
-  fs.outputFile('./dist/index.d.ts', fileHeaderWithDate, { encoding: 'utf8' });
+  fileContent += nativesList.join('\n\n') + `\n}\n`;
+
+  fs.outputFile('./dist/index.d.ts', fileContent, { encoding: 'utf8' });
 }
 
 main();
