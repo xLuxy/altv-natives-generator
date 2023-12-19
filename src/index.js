@@ -145,7 +145,7 @@ async function main() {
  * @module natives
  */
 declare module "natives" {
-  import { Vector3, Entity, Vehicle, Player } from "alt-client";
+  import { Vector3, Entity, Vehicle, Player, Ped } from "alt-client";
   export function toggleStrictChecks(enable: boolean): void;\n
 `;
   } else {
