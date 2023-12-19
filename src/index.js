@@ -46,7 +46,7 @@ function transformNativeType(type) {
 }
 
 function convertToBlockComment(inputString) {
-  const lines = inputString.split('\n');
+  const lines = inputString.split('\n').filter((line) => line.trim().length > 0);
   const indentedLines = lines.map((line, index) => {
     if (index === 0) {
       return '  /**\n   * ' + line;
