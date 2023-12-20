@@ -94,10 +94,11 @@ async function getNativeDbJson() {
 }
 
 function transformNativeParams(params) {
-  return params.reduceRight(({ args }, param) => {
-    const arg = `${param.name}: ${transformNativeType(param.type)}`;
-    return { args: [arg, ...args] };
-  }, { args: [] }).args;
+  return params.reduceRight(({ args, canBeOptional }, param) => {
+    const isOptional = param.ref && canBeOptional;
+    const arg = `${param.name}${isOptional ? '?' : ''}: ${transformNativeType(param.type)}`;
+    return { args: [arg, ...args], canBeOptional: canBeOptional ? param.ref : false };
+  }, { args: [], canBeOptional: true }).args;
 }
 
 async function main() {
