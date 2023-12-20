@@ -18,12 +18,14 @@ const transformedNativeTypes = {
   Cam: "number",
   FireId: "number",
   Pickup: "number",
+  LocalPlayer: 'LocalPlayer | number',
   // NOTE (xLuxy): Player might be wrong for some natives - majority should work?
-  Ped: "Ped | Player | number",
+  Ped: "Ped | Player | LocalPlayer | number",
   Player: "Player | number",
   Vehicle: "Vehicle | number",
   Entity: "Entity | number",
-  Blip: 'number'
+  Blip: 'number',
+  Object: 'number'
 };
 
 function convertSnakeToLowerCamelCase(input) {
@@ -41,7 +43,11 @@ function convertSnakeToLowerCamelCase(input) {
   return result;
 }
 
-function transformNativeType(type) {
+function transformNativeType(type, isReturnValue = false) {
+  if (isReturnValue && ["Ped", "Entity"].includes(type)) {
+    return "number";
+  }
+
   return transformedNativeTypes[type] || type;
 }
 
@@ -117,7 +123,7 @@ async function main() {
 
       const { params, results, comment } = native;
 
-      let transformedResult = results.replace(/^\[(.*)\]$/, '$1').split(', ').map((value) => transformNativeType(value));
+      let transformedResult = results.replace(/^\[(.*)\]$/, '$1').split(', ').map((value) => transformNativeType(value, true));
       if (transformedResult[0] === 'void' && !V1_TYPINGS) transformedResult.shift();
 
       const resultStr = transformedResult.length > 1 ? `[${transformedResult.join(', ')}]` : transformedResult[0] || 'void';
@@ -145,7 +151,7 @@ async function main() {
  * @module natives
  */
 declare module "natives" {
-  import { Vector3, Entity, Vehicle, Player, Ped } from "alt-client";
+  import { Vector3, Entity, Vehicle, Player, LocalPlayer, Ped } from "alt-client";
   export function toggleStrictChecks(enable: boolean): void;\n
 `;
   } else {
@@ -154,7 +160,7 @@ declare module "natives" {
  * @module @altv/natives
  */
 declare module "@altv/natives" {
-  import { Entity, Player, Ped, Vector3, Vehicle } from "@altv/client";\n
+  import { Entity, Player, LocalPlayer, Ped, Vector3, Vehicle } from "@altv/client";\n
 `;
   }
 
