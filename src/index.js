@@ -43,12 +43,12 @@ function convertSnakeToLowerCamelCase(input) {
   return result;
 }
 
-function transformNativeType(type, isReturnValue = false) {
-  if (isReturnValue && ["Ped", "Entity"].includes(type)) {
+function transformNativeType(type, isReference, isReturnValue = false) {
+  if (isReturnValue && ["Ped", "Entity", "Object", "Blip", "Vehicle", "Player", "LocalPlayer"].includes(type)) {
     return "number";
   }
 
-  return transformedNativeTypes[type] || type;
+  return (transformedNativeTypes[type] || type) + (isReference ? ' | null' : '');
 }
 
 function convertToBlockComment(inputString) {
@@ -102,7 +102,7 @@ async function getNativeDbJson() {
 function transformNativeParams(params) {
   return params.reduceRight(({ args, canBeOptional }, param) => {
     const isOptional = param.ref && canBeOptional;
-    const arg = `${param.name}${isOptional ? '?' : ''}: ${transformNativeType(param.type)}`;
+    const arg = `${param.name}${isOptional ? '?' : ''}: ${transformNativeType(param.type, param.ref)}`;
     return { args: [arg, ...args], canBeOptional: canBeOptional ? param.ref : false };
   }, { args: [], canBeOptional: true }).args;
 }
@@ -123,7 +123,7 @@ async function main() {
 
       const { params, results, comment } = native;
 
-      let transformedResult = results.replace(/^\[(.*)\]$/, '$1').split(', ').map((value) => transformNativeType(value, true));
+      let transformedResult = results.replace(/^\[(.*)\]$/, '$1').split(', ').map((value, index) => transformNativeType(value, false, true));
       if (transformedResult[0] === 'void' && !V1_TYPINGS) transformedResult.shift();
 
       const resultStr = transformedResult.length > 1 ? `[${transformedResult.join(', ')}]` : transformedResult[0] || 'void';
